@@ -112,7 +112,7 @@ namespace GemRB {
 // 	erase(newActorStateIdx);
 // }
 
-void TraversabilityCache::UpdateActorPosition(const Actor *actor, const NavmapPoint &OldPos, const NavmapPoint &NewPos, int inWidth) {
+void TraversabilityCache::UpdateActorPosition(const Movable *actor, const NavmapPoint &OldPos, const NavmapPoint &NewPos, int inWidth, TraversabilityCellState newCellState) {
 	ValidateTraversabilityCacheSize();
 
 	// clear old position
@@ -137,7 +137,7 @@ void TraversabilityCache::UpdateActorPosition(const Actor *actor, const NavmapPo
 	// mark new position
 
 	// todo: do actual check of bumpable and alive
-	TraversabilityCellState newCellState { TraversabilityCellState::ACTOR_NON_TRAVERSABLE };
+	// TraversabilityCellState newCellState { TraversabilityCellState::ACTOR_NON_TRAVERSABLE };
 	// if (!GetIsAlive(newActorStateIdx)) {
 	// 	newCellState = TraversabilityCellState::EMPTY;
 	// } else if (GetIsBumpable(newActorStateIdx)) {
@@ -160,6 +160,20 @@ void TraversabilityCache::UpdateActorPosition(const Actor *actor, const NavmapPo
 	}
 
 	// std::string both = MarkedS + ClearedS;
+}
+
+void TraversabilityCache::UpdateCellState(const Movable *actor, const NavmapPoint &Pos, int inWidth, TraversabilityCellState newCellState) {
+	const TraversabilityCellData newCellData { actor, newCellState };
+	const auto Region = CalculateRegion(actor, Pos);
+	for (int x = std::max(0, Region.origin.x); x < Region.origin.x + Region.size.w; ++x) {
+		for (int y = std::max(0, Region.origin.y); y < Region.origin.y + Region.size.h; ++y) {
+			if (!actor->IsOver(Point { x, y }, Pos)) {
+				continue;
+			}
+			const auto Idx = y * inWidth * 16 + x;
+			traversabilityData[Idx] = newCellData;
+		}
+	}
 }
 
 // void TraversabilityCache::Update()

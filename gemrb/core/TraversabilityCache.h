@@ -113,7 +113,7 @@ public:
 	 * Struct holding data describing traversability of a navmap point: its state and potential actor data.
 	 */
 	struct TraversabilityCellData {
-		const Actor* occupyingActor = nullptr;
+		const Movable* occupyingActor = nullptr;
 		TraversabilityCellState state = TraversabilityCellState::EMPTY;
 	};
 
@@ -142,14 +142,15 @@ public:
 		return traversabilityData.size();
 	}
 
-	void UpdateActorPosition(const Actor* actor, const NavmapPoint& OldPos, const NavmapPoint& NewPos, int inWidth);
+	void UpdateActorPosition(const Movable* actor, const NavmapPoint& OldPos, const NavmapPoint& NewPos, int inWidth, TraversabilityCellState newCellState);
+	void UpdateCellState(const Movable* actor, const NavmapPoint& Pos, int inWidth, TraversabilityCellState newCellState);
 
-	static FitRegion CalculateRegion(const Actor* inActor)
+	static FitRegion CalculateRegion(const Movable* inActor)
 	{
 		return CalculateRegion(inActor, inActor->Pos);
 	}
 
-	static FitRegion CalculateRegion(const Actor* inActor, const Point& Position)
+	static FitRegion CalculateRegion(const Movable* inActor, const Point& Position)
 	{
 		// code from Selectable::DrawCircle, will it be always correct for all NPCs?
 		const auto baseSize = inActor->CircleSize2Radius() * inActor->sizeFactor;

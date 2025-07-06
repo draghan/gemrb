@@ -417,7 +417,7 @@ private:
 
 	friend class TraversabilityCache;
 public:
-	TraversabilityCache traversabilityCache;
+	mutable TraversabilityCache traversabilityCache;
 private:
 	VideoBufferPtr wallStencil = nullptr;
 	Region stencilViewport;

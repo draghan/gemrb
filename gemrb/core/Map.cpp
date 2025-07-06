@@ -677,7 +677,7 @@ void Map::UpdateScripts()
 		ScopedTimer s("Val", &ScopedTimer::extraTimeTracked[extraTrackedIdx], &ScopedTimer::extraTagsTracked[extraTrackedIdx]);
 		if (!traversabilityCache.ValidateTraversabilityCacheSize()) {
 			for (const auto actor : actors) {
-				traversabilityCache.UpdateActorPosition(actor, {0, 0}, actor->Pos, PropsSize().w);
+				traversabilityCache.UpdateActorPosition(actor, {0, 0}, actor->Pos, PropsSize().w, TraversabilityCache::TraversabilityCellState::ACTOR_NON_TRAVERSABLE);
 			}
 		}
 	}
@@ -949,12 +949,15 @@ void Map::BlockSearchMapFor(const Movable* actor) const
 {
 	auto flag = actor->IsPC() ? PathMapFlags::PC : PathMapFlags::NPC;
 	tileProps.PaintSearchMap(actor->SMPos, actor->circleSize, flag);
+	// traversabilityCache.UpdateCellState(actor, actor->Pos, PropsSize().w, TraversabilityCache::TraversabilityCellState::ACTOR_NON_TRAVERSABLE);
 }
 
 void Map::ClearSearchMapFor(const Movable* actor) const
 {
 	std::vector<Actor*> nearActors = GetAllActorsInRadius(actor->Pos, GA_NO_SELF | GA_NO_DEAD | GA_NO_LOS | GA_NO_UNSCHEDULED, MAX_CIRCLE_SIZE * 3, actor);
 	tileProps.PaintSearchMap(actor->SMPos, actor->circleSize, PathMapFlags::UNMARKED);
+
+	// traversabilityCache.UpdateCellState(actor, actor->Pos, PropsSize().w, TraversabilityCache::TraversabilityCellState::EMPTY);
 
 	// Restore the searchmap areas of any nearby actors that could
 	// have been cleared by this BlockSearchMap(..., PathMapFlags::UNMARKED).

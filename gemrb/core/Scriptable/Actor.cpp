@@ -9112,7 +9112,7 @@ void Actor::SetPos(const NavmapPoint &pos) {
 			ScopedTimer::extraTagsTracked.push_back(std::string{});
 			const size_t extraTrackedIdx =  ScopedTimer::extraTimeTracked.size() - 1;
 			ScopedTimer s("Pos", &ScopedTimer::extraTimeTracked[extraTrackedIdx], &ScopedTimer::extraTagsTracked[extraTrackedIdx]);
-			area->traversabilityCache.UpdateActorPosition(this, Pos, pos, area->PropsSize().w);
+			area->traversabilityCache.UpdateActorPosition(this, Pos, pos, area->PropsSize().w, TraversabilityCache::TraversabilityCellState::ACTOR_NON_TRAVERSABLE);
 		}
 	//}
 	Movable::SetPos(pos);
