@@ -416,8 +416,9 @@ private:
 	bool hostilesVisible = false;
 
 	friend class TraversabilityCache;
+public:
 	TraversabilityCache traversabilityCache;
-
+private:
 	VideoBufferPtr wallStencil = nullptr;
 	Region stencilViewport;
 
@@ -712,7 +713,9 @@ private:
 	void DrawOverheadText() const;
 	void DrawWallPolygons(const Region& viewport) const;
 
+public:
 	Size PropsSize() const noexcept;
+private:
 	Size FogMapSize() const;
 	bool FogTileUncovered(const Point& p, const Bitmap*) const;
 

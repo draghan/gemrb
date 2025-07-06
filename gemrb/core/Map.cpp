@@ -58,6 +58,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include "PathfindingSettings.h"
+
 namespace GemRB {
 
 static constexpr unsigned int MAX_CIRCLESIZE = 8;
@@ -668,7 +670,18 @@ void Map::DrawPortal(const InfoPoint* ip, int enable)
 
 void Map::UpdateScripts()
 {
-	traversabilityCache.MarkNewFrame();
+	{
+		ScopedTimer::extraTimeTracked.push_back(0);
+		ScopedTimer::extraTagsTracked.push_back(std::string{});
+		const size_t extraTrackedIdx =  ScopedTimer::extraTimeTracked.size() - 1;
+		ScopedTimer s("Val", &ScopedTimer::extraTimeTracked[extraTrackedIdx], &ScopedTimer::extraTagsTracked[extraTrackedIdx]);
+		if (!traversabilityCache.ValidateTraversabilityCacheSize()) {
+			for (const auto actor : actors) {
+				traversabilityCache.UpdateActorPosition(actor, {0, 0}, actor->Pos, PropsSize().w);
+			}
+		}
+	}
+	// traversabilityCache.MarkNewFrame();
 
 	bool has_pcs = false;
 	for (const auto& actor : actors) {

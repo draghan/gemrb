@@ -240,7 +240,7 @@ Path Map::FindPath(const Point& s, const Point& d, unsigned int size, unsigned i
 {
 	TRACY(ZoneScoped);
 
-	traversabilityCache.Update();
+	// traversabilityCache.Update();
 
 	if (InDebugMode(DebugMode::PATHFINDER))
 		Log(DEBUG, "FindPath", "s = {}, d = {}, caller = {}, dist = {}, size = {}",
@@ -471,10 +471,10 @@ Path Map::RunFindPath(const Point& s, const Point& d, unsigned int size, unsigne
 	long originalMicroseconds;
 	long improvedMicroseconds;
 	constexpr const char* ImprovedBenchmarkName[] = { "FindPathOriginalImproved", "FindPathOriginalImproved*" };
-	const size_t ImprovedBenchmarkNameIdx = !traversabilityCache.HasUpdatedTraversabilityThisFrame(); // 0 for updated, 1 for not updated
-	if (!traversabilityCache.HasUpdatedTraversabilityThisFrame()) {
-		Log(DEBUG, "Map", "(improved implementation will recalculate cache)");
-	}
+	const size_t ImprovedBenchmarkNameIdx = 0; //!traversabilityCache.HasUpdatedTraversabilityThisFrame(); // 0 for updated, 1 for not updated
+	// if (!traversabilityCache.HasUpdatedTraversabilityThisFrame()) {
+	// 	Log(DEBUG, "Map", "(improved implementation will recalculate cache)");
+	// }
 #if PATH_RUN_BENCH
 	Log(DEBUG, "Map", "--- FindPath ---");
 	constexpr const char* ImprovedBenchmarkName[] = { "FindPathOriginalImproved", "FindPathOriginalImproved*" };
@@ -551,7 +551,7 @@ Path Map::RunFindPath(const Point& s, const Point& d, unsigned int size, unsigne
 		std::string tableToPrint = headings + line + lineOriginal + lineImproved;
 
 		if (!ScopedTimer::extraTimeTracked.empty()) {
-			constexpr bool bIsExtraTimeAlreadyIncludedInImprovedMeasurement = true;
+			constexpr bool bIsExtraTimeAlreadyIncludedInImprovedMeasurement = false;
 			const std::string lineImprovedExtra = prepareBenchmarkTableRow(ImprovedBenchmarkName[ImprovedBenchmarkNameIdx] + std::string("+"), improvedMicroseconds, ScopedTimer::extraTimeTracked, originalMicroseconds, bIsExtraTimeAlreadyIncludedInImprovedMeasurement);
 			tableToPrint += lineImprovedExtra;
 			ScopedTimer::extraTimeTracked.clear();

@@ -113,12 +113,12 @@ public:
 	 * Struct holding data describing traversability of a navmap point: its state and potential actor data.
 	 */
 	struct TraversabilityCellData {
-		Actor* occupyingActor = nullptr;
+		const Actor* occupyingActor = nullptr;
 		TraversabilityCellState state = TraversabilityCellState::EMPTY;
 	};
 
 	explicit TraversabilityCache(class Map* inMap)
-		: map { inMap }, cachedActorsState(0)
+		: map { inMap }
 	{
 	}
 
@@ -127,100 +127,115 @@ public:
 		return traversabilityData[inIndex];
 	}
 
-	bool HasUpdatedTraversabilityThisFrame() const
-	{
-		return hasBeenUpdatedThisFrame;
-	}
-
-	void MarkNewFrame()
-	{
-		hasBeenUpdatedThisFrame = false;
-	}
+	// bool HasUpdatedTraversabilityThisFrame() const
+	// {
+	// 	return hasBeenUpdatedThisFrame;
+	// }
+	//
+	// void MarkNewFrame()
+	// {
+	// 	hasBeenUpdatedThisFrame = false;
+	// }
 
 	size_t Size() const
 	{
 		return traversabilityData.size();
 	}
 
-	void Update();
+	void UpdateActorPosition(const Actor* actor, const NavmapPoint& OldPos, const NavmapPoint& NewPos, int inWidth);
 
+	static FitRegion CalculateRegion(const Actor* inActor)
+	{
+		return CalculateRegion(inActor, inActor->Pos);
+	}
+
+	static FitRegion CalculateRegion(const Actor* inActor, const Point& Position)
+	{
+		// code from Selectable::DrawCircle, will it be always correct for all NPCs?
+		const auto baseSize = inActor->CircleSize2Radius() * inActor->sizeFactor;
+		const GemRB::Size s(baseSize * 8, baseSize * 6);
+		return { Position - s.Center(), s };
+	}
+	// void Update();
+
+	bool ValidateTraversabilityCacheSize();
 private:
 	/**
 	 * Struct for storing cached state of actors on the map: position, occupied region on the navmap,
 	 * bumpable state and alive state.
 	 */
-	struct CachedActorsState {
-		constexpr static uint8_t FLAG_BUMPABLE = 1;
-		constexpr static uint8_t FLAG_ALIVE = 2;
-
-		std::vector<FitRegion> region;
-		std::vector<Actor*> actor;
-		std::vector<Point> pos;
-		std::vector<uint8_t> flags;
-
-		explicit CachedActorsState(size_t reserve);
-
-		void reserve(size_t reserve);
-
-		void clear();
-
-		void erase(size_t idx);
-
-		size_t AddCachedActorState(Actor* inActor);
-
-		void ClearOldPosition(size_t i, std::vector<TraversabilityCellData>& inOutTraversabilityData, int inWidth) const;
-
-		void MarkNewPosition(size_t i, std::vector<TraversabilityCellData>& inOutTraversabilityData, int inWidth, bool inShouldUpdateSelf = false);
-
-		void UpdateNewState(size_t i);
-
-		void emplace_back(CachedActorsState&& another);
-
-		static FitRegion CalculateRegion(const Actor* inActor);
-
-		// flags manipulation should be inlined
-		void SetIsBumpable(const size_t i)
-		{
-			flags[i] |= (1 << FLAG_BUMPABLE);
-		}
-
-		void ResetIsBumpable(const size_t i)
-		{
-			flags[i] &= ~(1 << FLAG_BUMPABLE);
-		}
-
-		void SetIsAlive(const size_t i)
-		{
-			flags[i] |= (1 << FLAG_ALIVE);
-		}
-
-		void ResetIsAlive(const size_t i)
-		{
-			flags[i] &= ~(1 << FLAG_ALIVE);
-		}
-
-		void FlipIsBumpable(const size_t i)
-		{
-			flags[i] ^= (1 << FLAG_BUMPABLE);
-		}
-
-		bool GetIsBumpable(const size_t i) const
-		{
-			return flags[i] & (1 << FLAG_BUMPABLE);
-		}
-
-		bool GetIsAlive(const size_t i) const
-		{
-			return flags[i] & (1 << FLAG_ALIVE);
-		}
-	};
+	// struct CachedActorsState {
+	// 	constexpr static uint8_t FLAG_BUMPABLE = 1;
+	// 	constexpr static uint8_t FLAG_ALIVE = 2;
+	//
+	// 	std::vector<FitRegion> region;
+	// 	std::vector<Actor*> actor;
+	// 	std::vector<Point> pos;
+	// 	std::vector<uint8_t> flags;
+	//
+	// 	explicit CachedActorsState(size_t reserve);
+	//
+	// 	void reserve(size_t reserve);
+	//
+	// 	void clear();
+	//
+	// 	void erase(size_t idx);
+	//
+	// 	size_t AddCachedActorState(Actor* inActor);
+	//
+	// 	void ClearOldPosition(size_t i, std::vector<TraversabilityCellData>& inOutTraversabilityData, int inWidth) const;
+	//
+	// 	void MarkNewPosition(size_t i, std::vector<TraversabilityCellData>& inOutTraversabilityData, int inWidth, bool inShouldUpdateSelf = false);
+	//
+	// 	void UpdateNewState(size_t i);
+	//
+	// 	void emplace_back(CachedActorsState&& another);
+	//
+	// 	static FitRegion CalculateRegion(const Actor* inActor);
+	//
+	// 	// flags manipulation should be inlined
+	// 	void SetIsBumpable(const size_t i)
+	// 	{
+	// 		flags[i] |= (1 << FLAG_BUMPABLE);
+	// 	}
+	//
+	// 	void ResetIsBumpable(const size_t i)
+	// 	{
+	// 		flags[i] &= ~(1 << FLAG_BUMPABLE);
+	// 	}
+	//
+	// 	void SetIsAlive(const size_t i)
+	// 	{
+	// 		flags[i] |= (1 << FLAG_ALIVE);
+	// 	}
+	//
+	// 	void ResetIsAlive(const size_t i)
+	// 	{
+	// 		flags[i] &= ~(1 << FLAG_ALIVE);
+	// 	}
+	//
+	// 	void FlipIsBumpable(const size_t i)
+	// 	{
+	// 		flags[i] ^= (1 << FLAG_BUMPABLE);
+	// 	}
+	//
+	// 	bool GetIsBumpable(const size_t i) const
+	// 	{
+	// 		return flags[i] & (1 << FLAG_BUMPABLE);
+	// 	}
+	//
+	// 	bool GetIsAlive(const size_t i) const
+	// 	{
+	// 		return flags[i] & (1 << FLAG_ALIVE);
+	// 	}
+	// };
 
 	Map* map;
 	std::vector<TraversabilityCellData> traversabilityData;
-	CachedActorsState cachedActorsState;
-	bool hasBeenUpdatedThisFrame { false };
+	// CachedActorsState cachedActorsState;
+	// bool hasBeenUpdatedThisFrame { false };
 
-	void ValidateTraversabilityCacheSize();
+
 };
 }
 

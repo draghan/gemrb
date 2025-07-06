@@ -62,6 +62,8 @@
 #include <cmath>
 #include <string>
 
+#include "PathfindingSettings.h"
+
 namespace GemRB {
 
 static const std::string blank;
@@ -9100,6 +9102,19 @@ bool Actor::HasVVCCell(const ResRef& resource) const
 bool VVCSort(const ScriptedAnimation* lhs, const ScriptedAnimation* rhs)
 {
 	return lhs->YOffset < rhs->YOffset;
+}
+
+void Actor::SetPos(const NavmapPoint &pos) {
+	//if (pos != Pos) {
+		if (area) {
+			ScopedTimer::extraTimeTracked.push_back(0);
+			ScopedTimer::extraTagsTracked.push_back(std::string{});
+			const size_t extraTrackedIdx =  ScopedTimer::extraTimeTracked.size() - 1;
+			ScopedTimer s("Pos", &ScopedTimer::extraTimeTracked[extraTrackedIdx], &ScopedTimer::extraTagsTracked[extraTrackedIdx]);
+			area->traversabilityCache.UpdateActorPosition(this, Pos, pos, area->PropsSize().w);
+		}
+	//}
+	Movable::SetPos(pos);
 }
 
 std::pair<vvcDict::const_iterator, vvcDict::const_iterator>

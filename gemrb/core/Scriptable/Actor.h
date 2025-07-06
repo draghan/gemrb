@@ -455,6 +455,8 @@ public:
 		return false;
 	}
 
+	void SetPos(const NavmapPoint &pos) override;
+
 	using stat_t = ieDword;
 	using stats_t = std::array<stat_t, MAX_STATS>;
 	//CRE DATA FIELDS
